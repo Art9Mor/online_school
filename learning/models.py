@@ -23,9 +23,9 @@ class Course(models.Model):
 
 class Lesson(models.Model):
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Курс', **NULLABLE)
-    title = models.CharField(max_length=120, verbose_name='Название урока', default='Название не указано')
-    description = models.TextField(verbose_name='Описание урока', default='Описание появится в скором времени')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Курс')
+    title = models.CharField(max_length=120, verbose_name='Название урока')
+    description = models.TextField(verbose_name='Описание урока', **NULLABLE)
     image = models.ImageField(upload_to='learning/', verbose_name='Первью', **NULLABLE)
     video = models.URLField(verbose_name='Ссылка на видео', **NULLABLE)
 
