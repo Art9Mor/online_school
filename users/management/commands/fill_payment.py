@@ -20,4 +20,3 @@ class Command(BaseCommand):
                                              method='Transfer'))
 
         Payment.objects.bulk_create(payment_to_create)
-
