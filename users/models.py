@@ -3,10 +3,17 @@ from django.db import models
 
 from learning.models import NULLABLE, Course, Lesson
 
+from django.utils.translation import gettext_lazy as _
+
 PAYMENT_CHOICE = (
     ('Cash', 'Наличные'),
     ('Transfer', 'Перевод на счет')
 )
+
+
+class UserRoles(models.TextChoices):
+    MEMBER = 'member', _('member')
+    MODERATOR = 'moderator', _('moderator')
 
 
 class User(AbstractUser):
