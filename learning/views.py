@@ -2,7 +2,7 @@ from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
 
 from learning.models import Course, Lesson
-from learning.permissions import IsOwnerStaff, IsOwner, IsModerator
+from learning.permissions import IsOwnerStaff
 from learning.serializers import *
 
 
@@ -26,11 +26,11 @@ class CourseViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             permission_classes = [IsAuthenticated]
         elif self.action == 'list' or self.action == 'retrieve':
-            permission_classes = [IsAuthenticated, IsOwner | IsModerator]
+            permission_classes = [IsAuthenticated, IsOwnerStaff]
         elif self.action == 'update':
-            permission_classes = [IsAuthenticated, IsOwner | IsModerator]
+            permission_classes = [IsAuthenticated, IsOwnerStaff]
         elif self.action == 'destroy':
-            permission_classes = [IsAuthenticated, IsOwner]
+            permission_classes = [IsAuthenticated, IsOwnerStaff]
         return [permission() for permission in permission_classes]
 
     def get_serializer_class(self):
@@ -68,7 +68,7 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
-    permission_classes = [IsOwner]
+    permission_classes = [IsOwnerStaff]
 
 
 class CourseLessonsListAPIView(generics.ListAPIView):
