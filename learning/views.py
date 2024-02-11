@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from learning.models import Course, Lesson
 from learning.permissions import IsOwnerStaff, IsOwner, IsModerator
-from learning.serializers import CourseSerializer, LessonSerializer, CourseLessonSerializer
+from learning.serializers import CourseSerializer, LessonSerializer, CourseLessonSerializer, LessonListSerializer
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -42,7 +42,7 @@ class LessonCreateAPIVIew(generics.CreateAPIView):
 
 
 class LessonListAPIVIew(generics.ListAPIView):
-    serializer_class = LessonSerializer
+    serializer_class = LessonListSerializer
     queryset = Lesson.objects.all()
     permission_classes = [IsOwnerStaff]
 
