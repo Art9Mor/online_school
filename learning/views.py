@@ -3,12 +3,16 @@ from rest_framework.permissions import IsAuthenticated
 
 from learning.models import Course, Lesson
 from learning.permissions import IsOwnerStaff, IsOwner, IsModerator
-from learning.serializers import CourseSerializer, LessonSerializer, CourseLessonSerializer, LessonListSerializer
+from learning.serializers import *
 
 
 class CourseViewSet(viewsets.ModelViewSet):
-    serializer_class = CourseSerializer
     queryset = Course.objects.all()
+    default_serializer = CourseSerializer
+    serializers = {
+        'list': CourseListSerializer,
+        'retrieve': CourseDetailSerializer,
+    }
 
     def perform_create(self, serializer):
         """
@@ -28,6 +32,9 @@ class CourseViewSet(viewsets.ModelViewSet):
         elif self.action == 'destroy':
             permission_classes = [IsAuthenticated, IsOwner]
         return [permission() for permission in permission_classes]
+
+    def get_serializer_class(self):
+        return self.serializers.get(self.action, self.default_serializer)
 
 
 class LessonCreateAPIVIew(generics.CreateAPIView):
