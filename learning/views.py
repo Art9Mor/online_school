@@ -52,10 +52,12 @@ class LessonCreateAPIVIew(generics.CreateAPIView):
 class LessonListAPIVIew(generics.ListAPIView):
     serializer_class = LessonListSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsOwner | IsModer]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['title', 'description', 'course__name', 'owner__username']
     ordering_fields = ['id',]
+
+    def get_queryset(self):
+        return super().get_queryset().filter(owner=self.request.user)
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
