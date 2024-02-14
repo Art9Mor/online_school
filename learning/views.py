@@ -1,8 +1,9 @@
 from rest_framework import viewsets, generics
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 
 from learning.models import Course, Lesson
-from learning.permissions import IsOwnerStaff
+from learning.permissions import IsModer, IsOwner
 from learning.serializers import *
 
 
@@ -18,20 +19,17 @@ class CourseViewSet(viewsets.ModelViewSet):
         """
         Create a new course and assign it to the current user
         """
-        new_course = serializer.save()
-        new_course.owner = self.request.user
+        new_course = serializer.save(owner=self.request.user)
         new_course.save()
 
     def get_permissions(self):
-        if self.action == 'create':
-            permission_classes = [IsAuthenticated]
-        elif self.action == 'list' or self.action == 'retrieve':
-            permission_classes = [IsAuthenticated, IsOwnerStaff]
-        elif self.action == 'update':
-            permission_classes = [IsAuthenticated, IsOwnerStaff]
-        elif self.action == 'destroy':
-            permission_classes = [IsAuthenticated, IsOwnerStaff]
-        return [permission() for permission in permission_classes]
+        if self.action in ('create',):
+            self.permission_classes = [IsAuthenticated, ~IsModer]
+        elif self.action in ('update', 'retrieve'):
+            self.permission_classes = [IsAuthenticated, IsModer | IsOwner]
+        elif self.action in ('destroy',):
+            self.permission_classes = [IsAuthenticated, IsOwner]
+        return super().get_permissions()
 
     def get_serializer_class(self):
         return self.serializers.get(self.action, self.default_serializer)
@@ -39,39 +37,42 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 class LessonCreateAPIVIew(generics.CreateAPIView):
     serializer_class = LessonSerializer
+    permission_classes = [~IsModer]
 
     def perform_create(self, serializer):
         """
         Create a new lesson instance and assign it to the current owner
         """
-        new_lesson = serializer.save(user=self.request.user)
+        new_lesson = serializer.save(owner=self.request.user)
         new_lesson.save()
 
 
 class LessonListAPIVIew(generics.ListAPIView):
     serializer_class = LessonListSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsOwnerStaff]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['title', 'description', 'course__name', 'owner__username']
+    ordering_fields = ['id',]
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsOwnerStaff]
+    permission_classes = [IsOwner | IsModer]
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsOwnerStaff]
+    permission_classes = [IsOwner | IsModer]
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
-    permission_classes = [IsOwnerStaff]
+    permission_classes = [IsOwner]
 
 
 class CourseLessonsListAPIView(generics.ListAPIView):
     queryset = Lesson.objects.filter(course__isnull=False)
     serializer_class = CourseLessonSerializer
-    permission_classes = [IsOwnerStaff]
+    permission_classes = [IsOwner | IsModer]
