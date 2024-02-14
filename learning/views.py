@@ -29,6 +29,8 @@ class CourseViewSet(viewsets.ModelViewSet):
             self.permission_classes = [IsAuthenticated, IsModer | IsOwner]
         elif self.action in ('destroy',):
             self.permission_classes = [IsAuthenticated, IsOwner]
+        elif self.action == 'list':
+            self.permission_classes = [IsAuthenticated, IsModer | IsOwner]
         return super().get_permissions()
 
     def get_serializer_class(self):
@@ -50,6 +52,7 @@ class LessonCreateAPIVIew(generics.CreateAPIView):
 class LessonListAPIVIew(generics.ListAPIView):
     serializer_class = LessonListSerializer
     queryset = Lesson.objects.all()
+    permission_classes = [IsOwner | IsModer]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['title', 'description', 'course__name', 'owner__username']
     ordering_fields = ['id',]
