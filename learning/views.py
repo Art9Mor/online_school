@@ -3,6 +3,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 
 from learning.models import Course, Lesson
+from learning.paginators import LearningPaginator
 from learning.permissions import IsModer, IsOwner
 from learning.serializers import *
 
@@ -10,6 +11,7 @@ from learning.serializers import *
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     default_serializer = CourseSerializer
+    pagination_class = LearningPaginator
     serializers = {
         'list': CourseListSerializer,
         'retrieve': CourseDetailSerializer,
@@ -51,6 +53,7 @@ class LessonCreateAPIVIew(generics.CreateAPIView):
 
 class LessonListAPIVIew(generics.ListAPIView):
     serializer_class = LessonListSerializer
+    pagination_class = LearningPaginator
     queryset = Lesson.objects.all()
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['title', 'description', 'course__name', 'owner__username']
@@ -80,4 +83,5 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
 class CourseLessonsListAPIView(generics.ListAPIView):
     queryset = Lesson.objects.filter(course__isnull=False)
     serializer_class = CourseLessonSerializer
+    pagination_class = LearningPaginator
     permission_classes = [IsOwner | IsModer]
