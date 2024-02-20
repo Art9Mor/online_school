@@ -38,3 +38,18 @@ class Payment(models.Model):
     class Meta:
         verbose_name = 'Платёж'
         verbose_name_plural = 'Платежи'
+
+
+class Subscription(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь',
+                              **NULLABLE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Курс', **NULLABLE)
+    is_active = models.BooleanField(default=False, verbose_name='Активность подписки')
+
+    def __str__(self):
+        return f'{self.owner}: {self.course} ({self.is_active})'
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+        unique_together = ('owner', 'course')

@@ -2,9 +2,8 @@ from rest_framework import viewsets, generics
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 
-from learning.models import Course, Lesson
 from learning.paginators import LearningPaginator
-from learning.permissions import IsModer, IsOwner
+from users.permissions import IsModer, IsOwner
 from learning.serializers import *
 
 
@@ -57,7 +56,7 @@ class LessonListAPIVIew(generics.ListAPIView):
     queryset = Lesson.objects.all()
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['title', 'description', 'course__name', 'owner__username']
-    ordering_fields = ['id',]
+    ordering_fields = ['id', ]
 
     def get_queryset(self):
         return super().get_queryset().filter(owner=self.request.user)
@@ -66,22 +65,23 @@ class LessonListAPIVIew(generics.ListAPIView):
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsOwner | IsModer]
+    permission_classes = [IsAuthenticated, IsOwner | IsModer]
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsOwner | IsModer]
+    permission_classes = [IsAuthenticated, IsOwner | IsModer]
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
-    permission_classes = [IsOwner]
+    permission_classes = [IsAuthenticated, IsOwner]
 
 
 class CourseLessonsListAPIView(generics.ListAPIView):
     queryset = Lesson.objects.filter(course__isnull=False)
     serializer_class = CourseLessonSerializer
     pagination_class = LearningPaginator
-    permission_classes = [IsOwner | IsModer]
+    permission_classes = [IsAuthenticated, IsOwner | IsModer]
+
