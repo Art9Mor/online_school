@@ -4,6 +4,7 @@ from rest_framework.relations import SlugRelatedField
 
 from learning.models import Course, Lesson
 from learning.validators import LinkValidator
+from users.models import Subscription
 
 
 class LessonSerializer(serializers.ModelSerializer):

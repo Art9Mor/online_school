@@ -4,7 +4,7 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient
 
 from learning.models import Course
-from users.models import User
+from users.models import User, Subscription
 
 
 class UsersTestCase(APITestCase):
@@ -27,7 +27,8 @@ class UsersTestCase(APITestCase):
     def test_subscription_create(self):
         data = {
             'owner': self.user.pk,
-            'course': self.course.pk
+            'course': self.course.pk,
+            'is_active': True
         }
 
         response = self.client.post(
@@ -38,13 +39,14 @@ class UsersTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_subscription_delete(self):
-        data = {
-            'owner': self.user.pk,
-            'course': self.course.pk
-        }
+        data = Subscription.objects.create(
+            owner=self.user,
+            course=self.course
+        )
 
         response = self.client.delete(
-            reverse('users:subscription_delete', kwargs={'pk': self.course.pk})
+            reverse('users:subscription_delete', kwargs={'pk': self.course.pk}),
+            data=data
         )
 
         self.assertEqual(
