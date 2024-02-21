@@ -11,22 +11,25 @@ class UsersTestCase(APITestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create(
+        self.owner = User.objects.create(
             email='testuser2@hell.ru',
             password=248
         )
 
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.owner)
 
         self.course = Course.objects.create(
             title='Test Course title',
             description='Test Course description',
-            owner=self.user
+            owner=self.owner
         )
 
     def test_subscription_create(self):
+        """
+        Test for creating a subscription
+        """
         data = {
-            'owner': self.user.pk,
+            'owner': self.owner.pk,
             'course': self.course.pk,
             'is_active': True
         }
@@ -35,18 +38,21 @@ class UsersTestCase(APITestCase):
             reverse('users:subscription_create', kwargs={'pk': self.course.pk}),
             data=data
         )
-
+        print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_subscription_delete(self):
+        """
+        Test for deleting a subscription
+        """
         data = Subscription.objects.create(
-            owner=self.user,
-            course=self.course
+            owner=self.owner,
+            course=self.course,
+            is_active=True
         )
 
         response = self.client.delete(
-            reverse('users:subscription_delete', kwargs={'pk': self.course.pk}),
-            data=data
+            reverse('users:subscription_delete', kwargs={'pk': self.course.pk})
         )
 
         self.assertEqual(
