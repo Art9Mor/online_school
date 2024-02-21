@@ -38,7 +38,7 @@ class UsersTestCase(APITestCase):
             reverse('users:subscription_create', kwargs={'pk': self.course.pk}),
             data=data
         )
-        print(response.json())
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_subscription_delete(self):
