@@ -81,7 +81,7 @@ class SubscriptionDeleteAPIView(generics.DestroyAPIView):
 
         subscription = Subscription.objects.get(course_id=course_id, owner_id=user_id)
 
-        if self.request.user != subscription.user:
+        if self.request.user != subscription.owner:
             raise serializers.ValidationError('Нельзя удалить чужую подписку!')
         else:
             self.perform_destroy(subscription)
