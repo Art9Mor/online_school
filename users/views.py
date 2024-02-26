@@ -3,6 +3,7 @@ from rest_framework import generics, serializers, status
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from learning.models import Course
 from users.permissions import IsOwner, IsModer
@@ -49,8 +50,8 @@ class PaymentListAPIView(generics.ListAPIView):
     queryset = Payment.objects.all()
 
     filter_backends = [SearchFilter, OrderingFilter, DjangoFilterBackend]
-    filterset_fields = ('course', 'lesson', 'method')
-    search_fields = ['course', 'lesson', 'method']
+    filterset_fields = ('paid_course', 'paid_lesson', 'method')
+    search_fields = ['paid_course', 'paid_lesson', 'method']
     ordering_fields = ['pay_day']
 
 
@@ -58,31 +59,58 @@ class PaymentCreateAPIView(generics.CreateAPIView):
     serializer_class = PaymentSerializer
 
 
-class SubscriptionCreateAPIView(generics.CreateAPIView):
+# class SubscriptionCreateAPIView(generics.CreateAPIView):
+#     serializer_class = SubscriptionSerializer
+#     queryset = Subscription.objects.all()
+#
+#     def perform_create(self, serializer):
+#         """
+#         Create a new subscription instance and assign it to the current owner
+#         """
+#         course_id = self.kwargs.get('pk')
+#         course = Course.objects.get(pk=course_id)
+#         subscription = serializer.save(owner=self.request.user, course=course, is_active=True)
+#         subscription.save()
+#
+#
+# class SubscriptionDeleteAPIView(generics.DestroyAPIView):
+#     queryset = Subscription.objects.all()
+#     permission_classes = [IsAuthenticated, IsOwner | IsModer]
+#
+#     def destroy(self, request, *args, **kwargs):
+#         course_id = self.kwargs.get('pk')
+#         user_id = self.request.user.pk
+#
+#         subscription = Subscription.objects.get(course_id=course_id, owner_id=user_id)
+#
+#         if self.request.user != subscription.owner:
+#             raise serializers.ValidationError('Нельзя удалить чужую подписку!')
+#         else:
+#             self.perform_destroy(subscription)
+#             return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SubscriptionView(APIView):
+    queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
 
-    def perform_create(self, serializer):
-        """
-        Create a new subscription instance and assign it to the current owner
-        """
-        course_id = self.kwargs.get('pk')
-        course = Course.objects.get(pk=course_id)
-        subscription = serializer.save(owner=self.request.user, course=course, is_active=True)
-        subscription.save()
+    def post(self, request, *args, **kwargs):
+        user = self.request.user
 
+        course_id = request.data.get('course_id')
+        course = course_id.objects.get_object_or_404()
 
-class SubscriptionDeleteAPIView(generics.DestroyAPIView):
-    queryset = Subscription.objects.all()
-    permission_classes = [IsAuthenticated, IsOwner | IsModer]
+        subscription = Subscription.objects.filter(owner=user, course=course, is_active=True)
 
-    def destroy(self, request, *args, **kwargs):
-        course_id = self.kwargs.get('pk')
-        user_id = self.request.user.pk
-
-        subscription = Subscription.objects.get(course_id=course_id, owner_id=user_id)
-
-        if self.request.user != subscription.owner:
+        if user != subscription.owner:
             raise serializers.ValidationError('Нельзя удалить чужую подписку!')
         else:
-            self.perform_destroy(subscription)
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            if subscription.exists():
+                subscription.delete()
+                message = 'подписка удалена'
+
+            else:
+                Subscription.objects.create(owner=user, course=course, is_active=True)
+                message = 'подписка добавлена'
+
+            return Response({"message": message}, {'user': user})

@@ -12,6 +12,7 @@ class Course(models.Model):
     title = models.CharField(max_length=120, verbose_name='Название курса', default='Название не указано')
     image = models.ImageField(upload_to='learning/', verbose_name='Первью', **NULLABLE)
     description = models.TextField(verbose_name='Описание курса', default='Описание появится в скором времени')
+    price = models.PositiveIntegerField(verbose_name='Цена', **NULLABLE)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, verbose_name='Правообладатель',
                               **NULLABLE)
 
@@ -32,6 +33,7 @@ class Lesson(models.Model):
     description = models.TextField(verbose_name='Описание урока', **NULLABLE)
     image = models.ImageField(upload_to='learning/', verbose_name='Первью', **NULLABLE)
     video = models.URLField(verbose_name='Ссылка на видео', **NULLABLE)
+    price = models.PositiveIntegerField(verbose_name='Цена', **NULLABLE)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, verbose_name='Правообладатель',
                               **NULLABLE)
 
