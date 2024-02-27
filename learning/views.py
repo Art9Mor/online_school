@@ -49,7 +49,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 
         subscriptions = course.subscription.all()
         for subscription in subscriptions:
-            send_email.delay(subscription.user.email, course.title)
+            send_email.delay(course.title, subscription.user.email)
         return Response({'message': 'Course updated.', 'Response': 200}, status=status.HTTP_200_OK)
 
 

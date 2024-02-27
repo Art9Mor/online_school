@@ -8,7 +8,7 @@ from config import settings
 def send_email(course, email):
     send_mail(
         subject='Online School',
-        message=f'There is a new lesson in {course.name}',
+        message=f'There is a new lesson in {course}',
         from_email=settings.EMAIL_HOST_USER,
         recipient_list=[email]
     )
