@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 from learning.models import NULLABLE, Course, Lesson
 
@@ -17,6 +18,7 @@ class User(AbstractUser):
     city = models.CharField(max_length=168, verbose_name='Горо', **NULLABLE)
     avatar = models.ImageField(upload_to='users/', verbose_name='Аватар', **NULLABLE)
     is_active = models.BooleanField(default=True, verbose_name='Активирован')
+    latest_login = models.DateTimeField(default=timezone.now(), verbose_name='Последнее посещение')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -41,9 +43,10 @@ class Payment(models.Model):
 
 
 class Subscription(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь',
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь', related_name='subscription',
                               **NULLABLE)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Курс', **NULLABLE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Курс', related_name='subscription',
+                               **NULLABLE)
     is_active = models.BooleanField(default=False, verbose_name='Активность подписки')
 
     def __str__(self):

@@ -1,5 +1,6 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, serializers, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -58,36 +59,20 @@ class PaymentListAPIView(generics.ListAPIView):
 class PaymentCreateAPIView(generics.CreateAPIView):
     serializer_class = PaymentSerializer
 
+    def perform_create(self, serializer):
+        course_id = self.kwargs.get('pk')
+        course = Course.objects.get(pk=course_id)
+        user = self.request.user
 
-# class SubscriptionCreateAPIView(generics.CreateAPIView):
-#     serializer_class = SubscriptionSerializer
-#     queryset = Subscription.objects.all()
-#
-#     def perform_create(self, serializer):
-#         """
-#         Create a new subscription instance and assign it to the current owner
-#         """
-#         course_id = self.kwargs.get('pk')
-#         course = Course.objects.get(pk=course_id)
-#         subscription = serializer.save(owner=self.request.user, course=course, is_active=True)
-#         subscription.save()
-#
-#
-# class SubscriptionDeleteAPIView(generics.DestroyAPIView):
-#     queryset = Subscription.objects.all()
-#     permission_classes = [IsAuthenticated, IsOwner | IsModer]
-#
-#     def destroy(self, request, *args, **kwargs):
-#         course_id = self.kwargs.get('pk')
-#         user_id = self.request.user.pk
-#
-#         subscription = Subscription.objects.get(course_id=course_id, owner_id=user_id)
-#
-#         if self.request.user != subscription.owner:
-#             raise serializers.ValidationError('Нельзя удалить чужую подписку!')
-#         else:
-#             self.perform_destroy(subscription)
-#             return Response(status=status.HTTP_204_NO_CONTENT)
+        if Payment.objects.filter(paid_course=course, owner=user).exists():
+            return ValidationError('This course is already paid')
+        else:
+            serializer.save(
+                paid_course=course,
+                owner=user,
+                paid_sum=course.price * 100,
+                method=self.request.method
+            )
 
 
 class SubscriptionView(APIView):
@@ -114,3 +99,4 @@ class SubscriptionView(APIView):
                 message = 'подписка добавлена'
 
             return Response({"message": message}, {'user': user})
+

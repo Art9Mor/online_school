@@ -50,6 +50,8 @@ INSTALLED_APPS = [
 
     'drf_yasg',
 
+    'django_celery_beat'
+
     # 'corsheaders',
 ]
 
@@ -144,6 +146,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.User'
 
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -180,3 +184,18 @@ SWAGGER_SETTINGS = {
 STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
 
 STRIPE_API_URL = os.getenv('STRIPE_API_URL')
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
+
+CELERY_TIMEZONE = "UTC"
+
+CELERY_TASK_TRACK_STARTED = True
+
+CELERY_BEAT_SCHEDULE = {
+    'task-name': {
+        'task': 'users.tasks.deactivating_user',  # Путь к задаче
+        'schedule': timedelta(days=1),  # Расписание выполнения задачи (например, каждые 10 минут)
+    },
+}

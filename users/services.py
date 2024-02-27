@@ -23,4 +23,4 @@ def create_stripe_session(stripe_price_id):
         line_items=[{"price": stripe_price_id, "quantity": 1}],
         mode="payment",
     )
-    return stripe_session
+    return stripe_session['url']

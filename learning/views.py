@@ -1,8 +1,10 @@
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, status
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from learning.paginators import LearningPaginator
+from learning.tasks import send_email
 from users.permissions import IsModer, IsOwner
 from learning.serializers import *
 
@@ -36,6 +38,19 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         return self.serializers.get(self.action, self.default_serializer)
+
+    def update(self, request, *args, **kwargs):
+        course_id = self.kwargs['pk']
+        course = Course.objects.get(pk=course_id)
+
+        for element in request.data:
+            if hasattr(course, element):
+                setattr(course, element, request.data[element])
+
+        subscriptions = course.subscription.all()
+        for subscription in subscriptions:
+            send_email.delay(subscription.user.email, course.title)
+        return Response({'message': 'Course updated.', 'Response': 200}, status=status.HTTP_200_OK)
 
 
 class LessonCreateAPIVIew(generics.CreateAPIView):
@@ -84,4 +99,3 @@ class CourseLessonsListAPIView(generics.ListAPIView):
     serializer_class = CourseLessonSerializer
     pagination_class = LearningPaginator
     permission_classes = [IsAuthenticated, IsOwner | IsModer]
-

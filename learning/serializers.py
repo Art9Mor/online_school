@@ -39,13 +39,6 @@ class CourseSerializer(serializers.ModelSerializer):
         is_subscribed = Subscription.objects.filter(course=obj.id, user=owner).exists()
         return is_subscribed
 
-    # def create(self, validated_data):
-    #     lessons_data = validated_data.pop('lessons')
-    #     course = Course.objects.create(**validated_data)
-    #     for lesson_data in lessons_data:
-    #         return Lesson.objects.create(course=course, **lesson_data)
-    #     return course
-
 
 class CourseDetailSerializer(serializers.ModelSerializer):
     lessons_in_course = SerializerMethodField()
