@@ -18,7 +18,7 @@ class User(AbstractUser):
     city = models.CharField(max_length=168, verbose_name='Горо', **NULLABLE)
     avatar = models.ImageField(upload_to='users/', verbose_name='Аватар', **NULLABLE)
     is_active = models.BooleanField(default=True, verbose_name='Активирован')
-    latest_login = models.DateTimeField(default=timezone.now(), verbose_name='Последнее посещение')
+    latest_login = models.DateTimeField(default=timezone.now, verbose_name='Последнее посещение')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
