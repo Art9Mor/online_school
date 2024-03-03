@@ -1,15 +1,16 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, serializers, status
+from rest_framework import generics, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from learning.models import Course
-from users.permissions import IsOwner, IsModer
 from users.models import Payment, User, Subscription
 from users.serializers import PaymentSerializer, UserSerializer, SubscriptionSerializer
+# from users.services import create_stripe_price, create_stripe_session
+from users.services import create_stripe_session
 
 
 class UserCreate(generics.CreateAPIView):
@@ -59,20 +60,35 @@ class PaymentListAPIView(generics.ListAPIView):
 class PaymentCreateAPIView(generics.CreateAPIView):
     serializer_class = PaymentSerializer
 
-    def perform_create(self, serializer):
-        course_id = self.kwargs.get('pk')
-        course = Course.objects.get(pk=course_id)
-        user = self.request.user
+    # def perform_create(self, serializer):
+    #     course_id = self.kwargs.get('pk')
+    #     course = Course.objects.get(pk=course_id)
+    #     user = self.request.user
+    #     price_id = create_stripe_price(
+    #         product=incoming.course.title,
+    #         price=incoming.course.price
+    #     )
+    #
+    #     if Payment.objects.filter(paid_course=course, owner=user).exists():
+    #         return ValidationError('This course is already paid')
+    #     else:
+    #         serializer.save(
+    #             paid_course=course,
+    #             owner=user,
+    #             paid_sum=course.price * 100,
+    #             method=self.request.method,
+    #             payment_session=create_stripe_session(price_id)
+    #         )
 
-        if Payment.objects.filter(paid_course=course, owner=user).exists():
-            return ValidationError('This course is already paid')
-        else:
-            serializer.save(
-                paid_course=course,
-                owner=user,
-                paid_sum=course.price * 100,
-                method=self.request.method
-            )
+    def perform_create(self, serializer):
+        course = serializer.validated_data.get('course')
+        if not course:
+            raise serializers.ValidationError('Course is required.')
+        payment = serializer.save()
+        payment.user = self.request.user
+        if payment.method == 'Transfer':
+            payment.payment_session = create_stripe_session(payment).id
+        payment.save()
 
 
 class SubscriptionView(APIView):

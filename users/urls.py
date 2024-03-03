@@ -14,6 +14,7 @@ urlpatterns = [
     path('delete/<int:pk>/', views.UserDelete.as_view(), name='user_delete'),
 
     path('payment/', views.PaymentListAPIView.as_view(), name='payment_list'),
+    path('payment/', views.PaymentCreateAPIView.as_view(), name='payment_create'),
 
     path('token/', TokenObtainPairView.as_view(), name='token_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
