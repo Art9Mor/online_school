@@ -65,8 +65,8 @@ class PaymentCreateAPIView(generics.CreateAPIView):
     #     course = Course.objects.get(pk=course_id)
     #     user = self.request.user
     #     price_id = create_stripe_price(
-    #         product=incoming.course.title,
-    #         price=incoming.course.price
+    #         product=serializer.course.title,
+    #         price=serializer.course.price
     #     )
     #
     #     if Payment.objects.filter(paid_course=course, owner=user).exists():

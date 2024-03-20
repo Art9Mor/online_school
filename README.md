@@ -3,3 +3,5 @@
 3) coverage run --source='.' manage.py test - запуск подсчёта покрытия тестами
 4) coverage report > coverage_report.txt - получение отсчёта о покрытии тестами и его запись в текстовый файл
 5) http://127.0.0.1:8000/api/docs/ - визуализация эндпоинтов
+6) docker compose build - создание докера
+7) docker compose up - поднятие/запуск докера
