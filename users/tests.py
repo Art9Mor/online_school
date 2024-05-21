@@ -35,7 +35,7 @@ class UsersTestCase(APITestCase):
         }
 
         response = self.client.post(
-            reverse('users:subscription_create', kwargs={'pk': self.course.pk}),
+            reverse('users:subscription', kwargs={'pk': self.course.pk}),
             data=data
         )
 
@@ -45,14 +45,14 @@ class UsersTestCase(APITestCase):
         """
         Test for deleting a subscription
         """
-        data = Subscription.objects.create(
-            owner=self.owner,
-            course=self.course,
-            is_active=True
-        )
+        # data = Subscription.objects.create(
+        #     owner=self.owner,
+        #     course=self.course,
+        #     is_active=True
+        # )
 
         response = self.client.delete(
-            reverse('users:subscription_delete', kwargs={'pk': self.course.pk})
+            reverse('users:subscription', kwargs={'pk': self.course.pk})
         )
 
         self.assertEqual(

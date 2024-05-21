@@ -96,7 +96,7 @@ DATABASES = {
         'NAME': os.getenv('DATABASE_NAME'),
         'USER': os.getenv('DATABASE_USER'),
         'PASSWORD': os.getenv('DATABASE_PASSWORD'),
-        'HOST': os.getenv('DATABASE_HOST')
+        'HOST': os.getenv('DATABASE_HOST', 'localhost')
     }
 }
 
@@ -196,8 +196,8 @@ CELERY_TASK_TRACK_STARTED = True
 
 CELERY_BEAT_SCHEDULE = {
     'task-name': {
-        'task': 'users.tasks.deactivating_user',  # Путь к задаче
-        'schedule': timedelta(days=1),  # Расписание выполнения задачи (например, каждые 10 минут)
+        'task': 'users.tasks.deactivating_user',
+        'schedule': timedelta(days=1),
     },
 }
 
