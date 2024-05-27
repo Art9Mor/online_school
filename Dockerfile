@@ -15,4 +15,4 @@ RUN chmod u+x /entrypoint
 
 ENTRYPOINT ["/entrypoint"]
 
-#CMD ["python", "manage.py", "runserver"]
+CMD ["python3", "manage.py", "runserver"]
